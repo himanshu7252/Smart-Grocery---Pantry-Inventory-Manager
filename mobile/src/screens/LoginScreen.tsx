@@ -10,7 +10,6 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { loginUser, clearError } from '../store/authSlice';
 import { THEME } from '../constants';
@@ -63,75 +62,73 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <View style={styles.header}>
-            <Text style={styles.icon}>🛒</Text>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to manage your inventory</Text>
-          </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <Text style={styles.icon}>🛒</Text>
+          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.subtitle}>Sign in to manage your inventory</Text>
+        </View>
 
-          <View style={styles.form}>
-            {(validationError || error) && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{validationError || error}</Text>
-              </View>
-            )}
-
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="enter your email"
-              placeholderTextColor="#94A3B8"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (validationError) setValidationError(null);
-              }}
-            />
-
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor="#94A3B8"
-              secureTextEntry
-              autoCapitalize="none"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                if (validationError) setValidationError(null);
-              }}
-            />
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
-              )}
-            </TouchableOpacity>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                <Text style={styles.link}>Sign Up</Text>
-              </TouchableOpacity>
+        <View style={styles.form}>
+          {(validationError || error) && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{validationError || error}</Text>
             </View>
+          )}
+
+          <Text style={styles.label}>Email Address</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="enter your email"
+            placeholderTextColor="#94A3B8"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (validationError) setValidationError(null);
+            }}
+          />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="••••••••"
+            placeholderTextColor="#94A3B8"
+            secureTextEntry
+            autoCapitalize="none"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (validationError) setValidationError(null);
+            }}
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.link}>Sign Up</Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

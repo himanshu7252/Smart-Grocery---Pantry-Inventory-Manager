@@ -7,7 +7,7 @@ import React from 'react';
 import { StatusBar, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { store } from './src/store';
 import RootNavigator from './src/navigation/RootNavigator';
 
@@ -20,7 +20,9 @@ function App(): React.JSX.Element {
             barStyle="light-content"
             {...(Platform.OS === 'android' ? { backgroundColor: '#0F172A' } : {})}
           />
-          <RootNavigator />
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#0F172A' }}>
+            <RootNavigator />
+          </SafeAreaView>
         </NavigationContainer>
       </SafeAreaProvider>
     </Provider>
