@@ -78,6 +78,13 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.mobile"
+
+    externalNativeBuild {
+        cmake {
+            buildStagingDirectory = file("D:/t/${rootProject.name}/cxx")
+        }
+    }
+
     defaultConfig {
         applicationId "com.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
