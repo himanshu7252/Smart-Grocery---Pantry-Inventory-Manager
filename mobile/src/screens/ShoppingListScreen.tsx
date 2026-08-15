@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,10 +21,13 @@ import {
   ShoppingItem
 } from '../store/shoppingListSlice';
 import { THEME } from '../constants';
+import { useTheme } from '../hooks/useTheme';
 import SvgIcon from '../components/SvgIcon';
 
 export const ShoppingListScreen: React.FC = () => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const { list, loading } = useAppSelector((state) => state.shoppingList);
 
   const [newItemName, setNewItemName] = useState('');
@@ -33,13 +36,13 @@ export const ShoppingListScreen: React.FC = () => {
   const [addLoading, setAddLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadList = () => {
+  const loadList = useCallback(() => {
     dispatch(fetchShoppingList());
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     loadList();
-  }, [dispatch]);
+  }, [loadList]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -126,7 +129,7 @@ export const ShoppingListScreen: React.FC = () => {
               {item.name}
             </Text>
             {item.itemId && (
-              <Text style={styles.linkedText}>🔗 Smart Link to Pantry</Text>
+              <Text style={styles.linkedText}> Smart Link to Pantry</Text>
             )}
           </View>
         </TouchableOpacity>
@@ -185,11 +188,11 @@ export const ShoppingListScreen: React.FC = () => {
       </View>
 
       {loading && !refreshing ? (
-        <ActivityIndicator size="large" color={THEME.primary} style={styles.loader} />
+        <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
       ) : (
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[THEME.primary]} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />}
         >
           {uncompletedItems.length === 0 && completedItems.length === 0 ? (
             <View style={styles.emptyContainer}>
@@ -234,53 +237,57 @@ export const ShoppingListScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   addBar: {
+    paddingTop: 20,
+    paddingBottom: 20,
     flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: theme.background,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.border,
-    alignItems: 'center'
+    borderBottomColor: theme.border,
+    alignItems: 'center',
+
   },
   input: {
     flex: 2,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: theme.card,
     borderRadius: 8,
     height: 40,
     paddingHorizontal: 12,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: THEME.border,
-    color: THEME.text
+    borderColor: theme.border,
+    color: theme.text
   },
   qtyInput: {
     width: 50,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: theme.card,
     borderRadius: 8,
     height: 40,
     paddingHorizontal: 8,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: THEME.border,
-    color: THEME.text,
+    borderColor: theme.border,
+    color: theme.text,
     marginLeft: 6,
     textAlign: 'center'
   },
   unitInput: {
     width: 60,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: theme.card,
     borderRadius: 8,
     height: 40,
     paddingHorizontal: 8,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: THEME.border,
-    color: THEME.text,
+    borderColor: theme.border,
+    color: theme.text,
     marginLeft: 6,
     textAlign: 'center'
   },
@@ -288,13 +295,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: THEME.primary,
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8
   },
   scrollContainer: {
-    padding: 16
+    paddingTop: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 16
   },
   loader: {
     marginTop: 40
@@ -308,14 +317,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: THEME.textMuted,
+    color: theme.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 10,
     paddingLeft: 4
   },
   itemRow: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 10,
     padding: 14,
     marginBottom: 10,
@@ -324,10 +333,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 1,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   itemRowCompleted: {
-    backgroundColor: '#F8FAFC'
+    backgroundColor: theme.card
   },
   checkboxContainer: {
     flexDirection: 'row',
@@ -345,8 +354,8 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   checkboxChecked: {
-    backgroundColor: THEME.primary,
-    borderColor: THEME.primary
+    backgroundColor: theme.primary,
+    borderColor: theme.primary
   },
   textContainer: {
     flex: 1
@@ -354,15 +363,15 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 15,
     fontWeight: '600',
-    color: THEME.text
+    color: theme.text
   },
   itemNameCompleted: {
     textDecorationLine: 'line-through',
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   linkedText: {
     fontSize: 10,
-    color: THEME.secondary,
+    color: theme.secondary,
     fontWeight: '700',
     marginTop: 2
   },
@@ -373,11 +382,11 @@ const styles = StyleSheet.create({
   itemQty: {
     fontSize: 14,
     fontWeight: '700',
-    color: THEME.text,
+    color: theme.text,
     marginRight: 16
   },
   itemQtyCompleted: {
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   deleteBtn: {
     padding: 4
@@ -395,7 +404,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '700',
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   emptySubText: {
     fontSize: 13,

@@ -11,6 +11,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import { THEME } from '../constants';
+import { useTheme } from '../hooks/useTheme';
 
 interface CategoryData {
   _id: string;
@@ -37,6 +38,8 @@ interface ActivityStat {
 }
 
 export const AnalyticsScreen: React.FC = () => {
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [activities, setActivities] = useState<ActivityStat[]>([]);
   const [predictions, setPredictions] = useState<PredictionData[]>([]);
@@ -91,10 +94,10 @@ export const AnalyticsScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[THEME.primary]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />}
       >
         {loading && !refreshing ? (
-          <ActivityIndicator size="large" color={THEME.primary} style={styles.loader} />
+          <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
         ) : (
           <>
             {/* Inventory Valuation Panel */}
@@ -212,13 +215,14 @@ export const AnalyticsScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   scrollContainer: {
-    padding: 16,
+    paddingTop: 10,
+    paddingHorizontal: 16,
     paddingBottom: 40
   },
   loader: {
@@ -256,46 +260,46 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   statsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     width: '48%',
     padding: 14,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: theme.border,
     elevation: 1
   },
   statsLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   statsNumber: {
     fontSize: 16,
     fontWeight: '800',
-    color: THEME.text,
+    color: theme.text,
     marginTop: 6
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: THEME.text,
+    color: theme.text,
     marginTop: 10,
     marginBottom: 8,
     paddingLeft: 4
   },
   descriptionText: {
     fontSize: 12,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     marginBottom: 12,
     paddingHorizontal: 4,
     lineHeight: 18
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: theme.border,
     elevation: 1,
     marginBottom: 20
   },
@@ -311,11 +315,11 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: 13,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   categoryVal: {
     fontSize: 12,
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   progressBarBg: {
     height: 6,
@@ -324,16 +328,16 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: 6,
-    backgroundColor: THEME.primary,
+    backgroundColor: theme.primary,
     borderRadius: 3
   },
   predictionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: theme.border,
     elevation: 1
   },
   predictionHeader: {
@@ -348,7 +352,7 @@ const styles = StyleSheet.create({
   predictionName: {
     fontSize: 15,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   badge: {
     borderRadius: 4,
@@ -369,10 +373,10 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   },
   badgeTextDanger: {
-    color: THEME.danger
+    color: theme.danger
   },
   badgeTextWarning: {
-    color: THEME.warning
+    color: theme.warning
   },
   badgeTextSuccess: {
     color: '#2E7D32'
@@ -386,18 +390,18 @@ const styles = StyleSheet.create({
   },
   predLabel: {
     fontSize: 11,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontWeight: '500'
   },
   predVal: {
     fontSize: 13,
     fontWeight: '700',
-    color: THEME.text,
+    color: theme.text,
     marginTop: 4
   },
   emptyText: {
     fontSize: 13,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontStyle: 'italic',
     textAlign: 'center'
   }

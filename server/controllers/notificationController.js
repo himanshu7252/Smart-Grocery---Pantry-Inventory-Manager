@@ -1,4 +1,4 @@
-const Notification = require('../models/notification');
+const Notification = require('../models/Notification.js');
 
 // @desc    Get user notifications
 // @route   GET /api/notifications

@@ -1,6 +1,6 @@
-const Grocery = require('../models/grocery');
-const Transaction = require('../models/transaction');
-const { checkAlertsAndSyncShoppingList } = require('../services/alertService');
+const Grocery = require('../models/Grocery.js');
+const Transaction = require('../models/Transaction.js');
+const { checkAlertsAndSyncShoppingList } = require('../services/alertService.js');
 
 // @desc    Get all grocery items (with search, filter, sort)
 // @route   GET /api/inventory

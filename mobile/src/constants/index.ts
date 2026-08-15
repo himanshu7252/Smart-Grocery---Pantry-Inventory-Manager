@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:5000/api';
+export const API_BASE_URL = 'https://server-lake-omega-21.vercel.app/api';
 
 export const CATEGORIES = [
   'Vegetables',

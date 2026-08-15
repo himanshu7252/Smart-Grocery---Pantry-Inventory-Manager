@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { useAppDispatch } from '../hooks/redux';
 import { restoreSession } from '../store/authSlice';
 import { THEME } from '../constants';
@@ -19,9 +19,10 @@ export const SplashScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <View style={styles.iconPlaceholder}>
-          <Text style={styles.logoIcon}>🛒</Text>
-        </View>
+        <Image
+          source={require('../assets/images/app_logo.png')}
+          style={styles.logoImage}
+        />
         <Text style={styles.title}>PantrySmart</Text>
         <Text style={styles.subtitle}>Smart Grocery & Stock Manager</Text>
       </View>
@@ -43,22 +44,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  iconPlaceholder: {
-    width: 90,
-    height: 90,
+  logoImage: {
+    width: 100,
+    height: 100,
     borderRadius: 24,
-    backgroundColor: THEME.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: THEME.primary,
     elevation: 8,
     shadowColor: THEME.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10
-  },
-  logoIcon: {
-    fontSize: 44
   },
   title: {
     fontSize: 32,

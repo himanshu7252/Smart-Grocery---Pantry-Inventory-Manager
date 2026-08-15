@@ -3,13 +3,15 @@ import authReducer from './authSlice';
 import inventoryReducer from './inventorySlice';
 import shoppingListReducer from './shoppingListSlice';
 import notificationReducer from './notificationSlice';
+import settingsReducer from './settingsSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     inventory: inventoryReducer,
     shoppingList: shoppingListReducer,
-    notifications: notificationReducer
+    notifications: notificationReducer,
+    settings: settingsReducer
   }
 });
 

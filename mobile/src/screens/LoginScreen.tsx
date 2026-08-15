@@ -8,7 +8,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { loginUser, clearError } from '../store/authSlice';
@@ -68,7 +69,10 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.icon}>🛒</Text>
+          <Image
+            source={require('../assets/images/app_logo.png')}
+            style={styles.logoImage}
+          />
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to manage your inventory</Text>
         </View>
@@ -146,8 +150,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 36
   },
-  icon: {
-    fontSize: 50,
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
     marginBottom: 16
   },
   title: {

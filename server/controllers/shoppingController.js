@@ -1,6 +1,6 @@
-const ShoppingList = require('../models/shoppingList');
-const Grocery = require('../models/grocery');
-const Transaction = require('../models/transaction');
+const ShoppingList = require('../models/ShoppingList.js');
+const Grocery = require('../models/Grocery.js');
+const Transaction = require('../models/Transaction.js');
 
 // @desc    Get active shopping list for user
 // @route   GET /api/shopping-lists

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -6,53 +6,39 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
-  TextInput,
   Alert,
-  ActivityIndicator
+  Switch
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { logoutUser } from '../store/authSlice';
-import api from '../services/api';
 import { THEME } from '../constants';
-
-interface FamilyInfo {
-  _id: string;
-  name: string;
-  ownerId: string;
-  members: Array<{ _id: string; name: string; email: string }>;
-}
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../hooks/useTheme';
+import { setDarkMode, setOfflineCaching } from '../store/settingsSlice';
 
 export const ProfileScreen: React.FC = () => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
   const { user } = useAppSelector((state) => state.auth);
+  const { darkMode, offlineCaching } = useAppSelector((state) => state.settings);
 
-  const [family, setFamily] = useState<FamilyInfo | null>(null);
-  const [familyName, setFamilyName] = useState('');
-  const [familyCode, setFamilyCode] = useState('');
-  const [familyLoading, setFamilyLoading] = useState(false);
-
-  const loadFamilyDetails = async () => {
-    if (!user?.familyId) {
-      setFamily(null);
-      return;
-    }
+  const toggleDarkMode = (value: boolean) => {
+    dispatch(setDarkMode(value));
     try {
-      setFamilyLoading(true);
-      // Fetches family details from server
-      const res = await api.get(`/auth/family/${user.familyId}`);
-      if (res.data?.success) {
-        setFamily(res.data.data);
-      }
+      AsyncStorage.setItem('pref_dark_mode', String(value));
     } catch (err) {
-      console.error('Error fetching family groups:', err);
-    } finally {
-      setFamilyLoading(false);
+      console.error('Error saving dark mode preference:', err);
     }
   };
 
-  useEffect(() => {
-    loadFamilyDetails();
-  }, [user?.familyId]);
+  const toggleOfflineCaching = (value: boolean) => {
+    dispatch(setOfflineCaching(value));
+    try {
+      AsyncStorage.setItem('pref_offline_caching', String(value));
+    } catch (err) {
+      console.error('Error saving offline caching preference:', err);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -67,43 +53,8 @@ export const ProfileScreen: React.FC = () => {
     ]);
   };
 
-  const handleCreateFamily = async () => {
-    if (!familyName.trim()) return;
-    setFamilyLoading(true);
-    try {
-      // Create Family endpoint Simulation / call
-      // In advanced sharing, it logs on server
-      const res = await api.post('/auth/family/create', { name: familyName });
-      if (res.data?.success) {
-        Alert.alert('Success', `Family Group "${familyName}" created!`);
-        // Force refresh user profile
-        loadFamilyDetails();
-      }
-    } catch (err: any) {
-      Alert.alert('Failed', err.response?.data?.message || 'Failed to create family group');
-    } finally {
-      setFamilyLoading(false);
-    }
-  };
-
-  const handleJoinFamily = async () => {
-    if (!familyCode.trim()) return;
-    setFamilyLoading(true);
-    try {
-      const res = await api.post('/auth/family/join', { familyId: familyCode });
-      if (res.data?.success) {
-        Alert.alert('Success', 'Successfully joined the family group!');
-        loadFamilyDetails();
-      }
-    } catch (err: any) {
-      Alert.alert('Failed', err.response?.data?.message || 'Failed to join group');
-    } finally {
-      setFamilyLoading(false);
-    }
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* User Card */}
         <View style={styles.profileCard}>
@@ -115,77 +66,31 @@ export const ProfileScreen: React.FC = () => {
           {user?.phone ? <Text style={styles.phoneText}>📞 {user.phone}</Text> : null}
         </View>
 
-        {/* Family Sharing Section */}
-        <Text style={styles.sectionTitle}>Family Sharing & Shared Pantry</Text>
-        {familyLoading ? (
-          <ActivityIndicator size="small" color={THEME.primary} style={styles.loader} />
-        ) : family ? (
-          <View style={styles.card}>
-            <Text style={styles.familyTitle}>👪 {family.name}</Text>
-            <Text style={styles.familyCode}>Invite Code: {family._id}</Text>
-            <Text style={styles.subTitle}>Group Members:</Text>
-            {family.members?.map((member) => (
-              <View key={member._id} style={styles.memberRow}>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <Text style={styles.memberEmail}>{member.email}</Text>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.card}>
-            <Text style={styles.infoText}>
-              Share your grocery list and pantry stock with family members in real-time!
-            </Text>
-
-            <View style={styles.actionBlock}>
-              <Text style={styles.label}>Create Family Group</Text>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. The Smiths Pantry"
-                  placeholderTextColor="#94A3B8"
-                  value={familyName}
-                  onChangeText={setFamilyName}
-                />
-                <TouchableOpacity style={styles.btn} onPress={handleCreateFamily}>
-                  <Text style={styles.btnText}>Create</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.actionBlock}>
-              <Text style={styles.label}>Join Group via Invite Code</Text>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. 660f9ac8d..."
-                  placeholderTextColor="#94A3B8"
-                  value={familyCode}
-                  onChangeText={setFamilyCode}
-                />
-                <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={handleJoinFamily}>
-                  <Text style={styles.btnText}>Join</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
-
         {/* App Config */}
-        <Text style={styles.sectionTitle}>App Preferences</Text>
-        <View style={styles.card}>
-          <View style={styles.prefRow}>
-            <Text style={styles.prefLabel}>Dark Mode (Simulation)</Text>
-            <Text style={styles.prefVal}>Disabled</Text>
+        <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>App Preferences</Text>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={[styles.prefRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.prefLabel, { color: theme.text }]}>Dark Mode (Simulation)</Text>
+            <Switch
+              value={darkMode}
+              onValueChange={toggleDarkMode}
+              trackColor={{ false: '#CBD5E1', true: theme.primary }}
+              thumbColor={darkMode ? '#FFFFFF' : '#F1F5F9'}
+            />
           </View>
-          <View style={styles.prefRow}>
-            <Text style={styles.prefLabel}>Offline Storage Caching</Text>
-            <Text style={styles.prefVal}>Active</Text>
+          <View style={[styles.prefRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.prefLabel, { color: theme.text }]}>Offline Storage Caching</Text>
+            <Switch
+              value={offlineCaching}
+              onValueChange={toggleOfflineCaching}
+              trackColor={{ false: '#CBD5E1', true: theme.primary }}
+              thumbColor={offlineCaching ? '#FFFFFF' : '#F1F5F9'}
+            />
           </View>
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <TouchableOpacity style={[styles.logoutBtn, { backgroundColor: theme.card, borderColor: theme.border }]} onPress={handleLogout}>
           <Text style={styles.logoutBtnText}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -199,7 +104,8 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.background
   },
   scrollContainer: {
-    padding: 16,
+    paddingTop: 10,
+    paddingHorizontal: 16,
     paddingBottom: 40
   },
   profileCard: {
@@ -258,101 +164,18 @@ const styles = StyleSheet.create({
     elevation: 1,
     marginBottom: 20
   },
-  infoText: {
-    fontSize: 13,
-    color: THEME.textMuted,
-    lineHeight: 18,
-    marginBottom: 14
-  },
-  actionBlock: {
-    marginBottom: 14
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: THEME.text,
-    marginBottom: 6
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 8,
-    height: 40,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: THEME.border,
-    color: THEME.text,
-    fontSize: 13
-  },
-  btn: {
-    height: 40,
-    backgroundColor: THEME.primary,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginLeft: 8
-  },
-  btnSecondary: {
-    backgroundColor: THEME.secondary
-  },
-  btnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700'
-  },
-  familyTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: THEME.text,
-    marginBottom: 4
-  },
-  familyCode: {
-    fontSize: 11,
-    color: THEME.textMuted,
-    marginBottom: 14
-  },
-  subTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: THEME.text,
-    marginBottom: 8
-  },
-  memberRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9'
-  },
-  memberName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: THEME.text
-  },
-  memberEmail: {
-    fontSize: 12,
-    color: THEME.textMuted
-  },
+
   prefRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    alignItems: 'center',
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9'
   },
   prefLabel: {
     fontSize: 14,
     color: THEME.text
-  },
-  prefVal: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: THEME.textMuted
   },
   logoutBtn: {
     backgroundColor: '#FFFFFF',
@@ -369,9 +192,6 @@ const styles = StyleSheet.create({
     color: THEME.danger,
     fontSize: 15,
     fontWeight: '700'
-  },
-  loader: {
-    paddingVertical: 16
   }
 });
 

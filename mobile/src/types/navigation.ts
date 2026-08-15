@@ -5,7 +5,6 @@ export type RootStackParamList = {
   AddGrocery: undefined;
   GroceryDetails: { itemId: string };
   EditGrocery: { itemId: string };
-  Scanner: undefined;
 };
 
 export type AuthStackParamList = {

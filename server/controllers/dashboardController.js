@@ -1,6 +1,6 @@
-const Grocery = require('../models/grocery');
-const Transaction = require('../models/transaction');
-const ShoppingList = require('../models/shoppingList');
+const Grocery = require('../models/Grocery.js');
+const Transaction = require('../models/Transaction.js');
+const ShoppingList = require('../models/ShoppingList.js');
 
 // @desc    Get dashboard metrics summary
 // @route   GET /api/dashboard/summary

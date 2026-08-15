@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const Family = require('../models/family');
+const User = require('../models/User.js');
+const Family = require('../models/Family.js');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register

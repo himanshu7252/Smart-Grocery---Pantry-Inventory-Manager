@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { deleteGrocery, consumeGrocery, purchaseGrocery } from '../store/invento
 import api from '../services/api';
 import { THEME } from '../constants';
 import SvgIcon from '../components/SvgIcon';
+import { useTheme } from '../hooks/useTheme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { RouteProp } from '@react-navigation/native';
@@ -37,8 +38,10 @@ interface HistoryLog {
 }
 
 export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { itemId } = route.params;
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const styles = getStyles(theme);
+  const { itemId } = route.params;
 
   // Get item from inventory slice
   const item = useAppSelector((state) =>
@@ -54,7 +57,7 @@ export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => 
   const [modalReason, setModalReason] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       setHistoryLoading(true);
       const res = await api.get(`/inventory/${itemId}/history`);
@@ -66,13 +69,13 @@ export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => 
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, [itemId]);
 
   useEffect(() => {
     if (item) {
       loadHistory();
     }
-  }, [itemId, item?.quantity]);
+  }, [item, loadHistory]);
 
   const handleDelete = () => {
     Alert.alert(
@@ -165,10 +168,10 @@ export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => 
             onPress={() => navigation.navigate('EditGrocery', { itemId })}
             style={styles.actionIcon}
           >
-            <SvgIcon name="edit" size={20} color={THEME.primary} />
+            <SvgIcon name="edit" size={20} color={theme.primary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleDelete} style={styles.actionIcon}>
-            <SvgIcon name="trash" size={20} color={THEME.danger} />
+            <SvgIcon name="trash" size={20} color={theme.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -275,7 +278,7 @@ export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => 
                       </View>
                       <View>
                         <Text style={styles.logType}>
-                          {log.type} {log.reason ? `(${log.reason})` : ''}
+                          {isAdd ? 'Purchase' : 'Consumption'}
                         </Text>
                         <Text style={styles.logDate}>{date}</Text>
                       </View>
@@ -283,7 +286,7 @@ export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => 
                     <Text
                       style={[
                         styles.logQtyText,
-                        { color: isAdd ? THEME.primary : THEME.danger }
+                        { color: isAdd ? theme.primary : theme.danger }
                       ]}
                     >
                       {isAdd ? '+' : '-'}
@@ -355,20 +358,20 @@ export const GroceryDetailsScreen: React.FC<Props> = ({ navigation, route }) => 
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    backgroundColor: theme.card,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.border
+    borderBottomColor: theme.border
   },
   headerBackText: {
     fontSize: 14,
@@ -383,11 +386,12 @@ const styles = StyleSheet.create({
     padding: 2
   },
   scrollContainer: {
-    padding: 16,
+    paddingTop: 10,
+    paddingHorizontal: 16,
     paddingBottom: 40
   },
   detailsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 16,
     padding: 20,
     elevation: 3,
@@ -413,11 +417,11 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 22,
     fontWeight: '800',
-    color: THEME.text
+    color: theme.text
   },
   brandText: {
     fontSize: 15,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     marginTop: 4
   },
   locationContainer: {
@@ -429,7 +433,7 @@ const styles = StyleSheet.create({
     fontWeight: '600'
   },
   quantityCallout: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: theme.background,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -440,20 +444,20 @@ const styles = StyleSheet.create({
   quantityLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: THEME.textMuted,
+    color: theme.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5
   },
   quantityValue: {
     fontSize: 32,
     fontWeight: '800',
-    color: THEME.text,
+    color: theme.text,
     marginTop: 6
   },
   unitText: {
     fontSize: 20,
     fontWeight: '600',
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   actionsRow: {
     flexDirection: 'row',
@@ -473,14 +477,14 @@ const styles = StyleSheet.create({
     borderColor: '#FCA5A5'
   },
   btnPrimary: {
-    backgroundColor: THEME.primary
+    backgroundColor: theme.primary
   },
   btnTxt: {
     fontSize: 14,
     fontWeight: '700'
   },
   btnDangerTxt: {
-    color: THEME.danger
+    color: theme.danger
   },
   section: {
     marginBottom: 20
@@ -488,16 +492,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: THEME.text,
+    color: theme.text,
     marginBottom: 8
   },
   specCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 16,
     elevation: 1,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   specRow: {
     flexDirection: 'row',
@@ -508,36 +512,36 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontSize: 14,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontWeight: '500'
   },
   specValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   expiryValue: {
-    color: THEME.warning
+    color: theme.warning
   },
   notesCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   notesText: {
     fontSize: 14,
-    color: '#475569',
+    color: theme.text,
     lineHeight: 20
   },
   logsContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     paddingHorizontal: 16,
     elevation: 1,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   logRow: {
     flexDirection: 'row',
@@ -562,11 +566,11 @@ const styles = StyleSheet.create({
   logType: {
     fontSize: 13,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   logDate: {
     fontSize: 11,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     marginTop: 2
   },
   logQtyText: {
@@ -574,7 +578,7 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   },
   emptyLogsText: {
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontSize: 13,
     fontStyle: 'italic',
     paddingLeft: 4
@@ -589,7 +593,7 @@ const styles = StyleSheet.create({
     padding: 24
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 16,
     padding: 24,
     elevation: 8
@@ -597,7 +601,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: THEME.text,
+    color: theme.text,
     marginBottom: 16
   },
   modalLabel: {
@@ -608,13 +612,13 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   modalInput: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: theme.background,
     borderRadius: 8,
     height: 44,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: THEME.border,
-    color: THEME.text
+    borderColor: theme.border,
+    color: theme.text
   },
   modalActions: {
     flexDirection: 'row',
@@ -631,7 +635,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9'
   },
   modalBtnSubmit: {
-    backgroundColor: THEME.primary
+    backgroundColor: theme.primary
   },
   modalBtnTxtCancel: {
     color: '#475569',
@@ -649,13 +653,13 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontWeight: '500',
     textAlign: 'center'
   },
   backText: {
     fontSize: 15,
-    color: THEME.primary,
+    color: theme.primary,
     fontWeight: '700',
     marginTop: 12
   },

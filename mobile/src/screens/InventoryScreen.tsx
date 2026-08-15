@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { fetchInventory, consumeGrocery, purchaseGrocery, GroceryItem } from '../store/inventorySlice';
 import { THEME, CATEGORIES } from '../constants';
+import { useTheme } from '../hooks/useTheme';
 import SvgIcon from '../components/SvgIcon';
 import QuantityStepper from '../components/QuantityStepper';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -28,7 +29,9 @@ interface Props {
 
 export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
-  const { items, loading, error } = useAppSelector((state) => state.inventory);
+  const theme = useTheme();
+  const styles = getStyles(theme);
+  const { items, loading } = useAppSelector((state) => state.inventory);
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -37,7 +40,7 @@ export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [stepperLoadingId, setStepperLoadingId] = useState<string | null>(null);
 
-  const loadInventory = () => {
+  const loadInventory = useCallback(() => {
     dispatch(
       fetchInventory({
         search: search || undefined,
@@ -46,12 +49,12 @@ export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
         sort: selectedSort
       })
     );
-  };
+  }, [dispatch, search, selectedCategory, selectedFilter, selectedSort]);
 
   useFocusEffect(
     useCallback(() => {
       loadInventory();
-    }, [search, selectedCategory, selectedFilter, selectedSort])
+    }, [loadInventory])
   );
 
   const onRefresh = () => {
@@ -99,9 +102,9 @@ export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
     const daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (daysUntilExpiry < 0) {
-      return { label: 'Expired', color: THEME.danger, bg: '#FEF2F2' };
+      return { label: 'Expired', color: theme.danger, bg: '#FEF2F2' };
     } else if (daysUntilExpiry <= 3) {
-      return { label: 'Expiring Soon', color: THEME.warning, bg: '#FFFBEB' };
+      return { label: 'Expiring Soon', color: theme.warning, bg: '#FFFBEB' };
     }
     return null;
   };
@@ -256,14 +259,14 @@ export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {loading && !refreshing ? (
-        <ActivityIndicator size="large" color={THEME.primary} style={styles.loader} />
+        <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
       ) : (
         <FlatList
           data={items}
           keyExtractor={(item) => item._id}
           renderItem={renderGroceryItem}
           contentContainerStyle={styles.listContainer}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[THEME.primary]} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Empty pantry list</Text>
@@ -281,24 +284,24 @@ export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   searchHeader: {
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8
+    paddingTop: 28,
+    paddingBottom: 4
   },
   searchInput: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 10,
     height: 44,
     paddingHorizontal: 16,
-    color: THEME.text,
+    color: theme.text,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: theme.border,
     elevation: 1,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
@@ -312,21 +315,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16
   },
   categoryChip: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 8,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: theme.border,
     height: 38
   },
   categoryChipActive: {
-    backgroundColor: THEME.primary,
-    borderColor: THEME.primary
+    backgroundColor: theme.primary,
+    borderColor: theme.primary
   },
   categoryChipText: {
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontSize: 13,
     fontWeight: '600'
   },
@@ -340,20 +343,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16
   },
   statusFilterChip: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginRight: 6,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   statusFilterChipActive: {
     backgroundColor: '#334155',
     borderColor: '#334155'
   },
   statusFilterText: {
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontSize: 12,
     fontWeight: '700'
   },
@@ -366,12 +369,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.border
+    borderBottomColor: theme.border
   },
   sortingLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: THEME.textMuted,
+    color: theme.textMuted,
     marginRight: 8
   },
   sortBtn: {
@@ -385,11 +388,11 @@ const styles = StyleSheet.create({
   },
   sortBtnTxt: {
     fontSize: 12,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontWeight: '600'
   },
   sortBtnTxtActive: {
-    color: THEME.text,
+    color: theme.text,
     fontWeight: '700'
   },
   listContainer: {
@@ -400,7 +403,7 @@ const styles = StyleSheet.create({
     marginTop: 40
   },
   card: {
-    backgroundColor: THEME.card,
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 14,
     marginBottom: 14,
@@ -421,11 +424,11 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 16,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   itemBrand: {
     fontSize: 13,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     marginTop: 2
   },
   badgeRow: {
@@ -483,7 +486,7 @@ const styles = StyleSheet.create({
   },
   lowStockBadgeText: {
     fontSize: 11,
-    color: THEME.warning,
+    color: theme.warning,
     fontWeight: '700'
   },
   statusBadge: {
@@ -503,7 +506,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '700',
-    color: THEME.textMuted
+    color: theme.textMuted
   },
   emptySubText: {
     fontSize: 13,
@@ -518,11 +521,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: THEME.primary,
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: THEME.primary,
+    shadowColor: theme.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5

@@ -8,7 +8,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { registerUser, clearError } from '../store/authSlice';
@@ -69,7 +70,10 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.icon}>🛒</Text>
+          <Image
+            source={require('../assets/images/app_logo.png')}
+            style={styles.logoImage}
+          />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Start managing your groceries smarter</Text>
         </View>
@@ -170,9 +174,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 28
   },
-  icon: {
-    fontSize: 44,
-    marginBottom: 8
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    marginBottom: 16
   },
   title: {
     fontSize: 26,

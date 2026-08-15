@@ -14,7 +14,7 @@ import {
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { updateGrocery } from '../store/inventorySlice';
 import { THEME, CATEGORIES, UNITS } from '../constants';
-import SvgIcon from '../components/SvgIcon';
+import { useTheme } from '../hooks/useTheme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { RouteProp } from '@react-navigation/native';
@@ -28,8 +28,10 @@ interface Props {
 }
 
 export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { itemId } = route.params;
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const styles = getStyles(theme);
+  const { itemId } = route.params;
 
   // Fetch item details from redux state
   const groceryItem = useAppSelector((state) =>
@@ -45,7 +47,6 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
   const [minimumStock, setMinimumStock] = useState('0');
   const [purchasePrice, setPurchasePrice] = useState('0');
   const [expiryDate, setExpiryDate] = useState('');
-  const [barcode, setBarcode] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -62,7 +63,6 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
       setUnit(groceryItem.unit);
       setMinimumStock(groceryItem.minimumStock.toString());
       setPurchasePrice(groceryItem.purchasePrice.toString());
-      setBarcode(groceryItem.barcode);
       setLocation(groceryItem.location);
       setNotes(groceryItem.notes);
 
@@ -73,14 +73,7 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }, [groceryItem]);
 
-  // Check if we came back from Scanner with a barcode
-  useEffect(() => {
-    const params = route.params as any;
-    if (params?.scannedBarcode) {
-      setBarcode(params.scannedBarcode);
-      navigation.setParams({ scannedBarcode: undefined } as any);
-    }
-  }, [route.params]);
+
 
   const validate = () => {
     if (!name.trim()) {
@@ -123,7 +116,7 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
         minimumStock: parseFloat(minimumStock),
         purchasePrice: parseFloat(purchasePrice),
         expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
-        barcode,
+        barcode: groceryItem?.barcode || '',
         location,
         notes
       };
@@ -164,7 +157,7 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.headerTitle}>Edit Grocery Item</Text>
           <TouchableOpacity onPress={handleSave} disabled={loading} style={styles.saveBtn}>
             {loading ? (
-              <ActivityIndicator color={THEME.primary} size="small" />
+              <ActivityIndicator color={theme.primary} size="small" />
             ) : (
               <Text style={styles.saveBtnText}>Save</Text>
             )}
@@ -277,36 +270,14 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
           </View>
 
-          <View style={styles.row}>
-            <View style={styles.halfCol}>
-              <Text style={styles.label}>Expiry Date</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#94A3B8"
-                value={expiryDate}
-                onChangeText={setExpiryDate}
-              />
-            </View>
-            <View style={styles.halfCol}>
-              <Text style={styles.label}>Barcode Scanner</Text>
-              <View style={styles.barcodeWrapper}>
-                <TextInput
-                  style={[styles.input, styles.barcodeInput]}
-                  placeholder="Scan or type barcode"
-                  placeholderTextColor="#94A3B8"
-                  value={barcode}
-                  onChangeText={setBarcode}
-                />
-                <TouchableOpacity
-                  style={styles.scannerBtn}
-                  onPress={() => navigation.navigate('Scanner')}
-                >
-                  <SvgIcon name="scanner" size={18} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
+          <Text style={styles.label}>Expiry Date</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#94A3B8"
+            value={expiryDate}
+            onChangeText={setExpiryDate}
+          />
 
           <Text style={styles.label}>Notes</Text>
           <TextInput
@@ -324,10 +295,10 @@ export const EditGroceryScreen: React.FC<Props> = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   keyboardContainer: {
     flex: 1
@@ -337,10 +308,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    backgroundColor: theme.card,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.border
+    borderBottomColor: theme.border
   },
   backBtn: {
     paddingVertical: 4
@@ -353,7 +324,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: THEME.text
+    color: theme.text
   },
   saveBtn: {
     paddingVertical: 4,
@@ -361,11 +332,12 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 14,
-    color: THEME.primary,
+    color: theme.primary,
     fontWeight: '700'
   },
   scrollContainer: {
-    padding: 16,
+    paddingTop: 10,
+    paddingHorizontal: 16,
     paddingBottom: 40
   },
   errorCard: {
@@ -385,19 +357,19 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#334155',
+    color: theme.text,
     marginBottom: 6,
     marginTop: 12
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 8,
     height: 44,
     paddingHorizontal: 16,
-    color: THEME.text,
+    color: theme.text,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   row: {
     flexDirection: 'row',
@@ -411,20 +383,20 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   categoryChip: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginRight: 6,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   categoryChipActive: {
-    backgroundColor: THEME.primary,
-    borderColor: THEME.primary
+    backgroundColor: theme.primary,
+    borderColor: theme.primary
   },
   categoryChipText: {
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontSize: 12,
     fontWeight: '600'
   },
@@ -435,20 +407,20 @@ const styles = StyleSheet.create({
     paddingVertical: 4
   },
   unitChip: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
     marginRight: 4,
     borderWidth: 1,
-    borderColor: THEME.border
+    borderColor: theme.border
   },
   unitChipActive: {
     backgroundColor: '#334155',
     borderColor: '#334155'
   },
   unitChipText: {
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontSize: 11,
     fontWeight: '700'
   },
@@ -467,7 +439,7 @@ const styles = StyleSheet.create({
   scannerBtn: {
     height: 44,
     width: 44,
-    backgroundColor: THEME.secondary,
+    backgroundColor: theme.secondary,
     borderTopRightRadius: 8,
     borderBottomRightRadius: 8,
     justifyContent: 'center',
@@ -486,7 +458,7 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 16,
-    color: THEME.primary,
+    color: theme.primary,
     fontWeight: '700',
     marginTop: 16
   }

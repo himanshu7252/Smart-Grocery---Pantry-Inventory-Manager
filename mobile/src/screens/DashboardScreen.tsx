@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { fetchNotifications, markNotificationRead, NotificationType } from '../store/notificationSlice';
 import api from '../services/api';
 import { THEME } from '../constants';
+import { useTheme } from '../hooks/useTheme';
 import SvgIcon from '../components/SvgIcon';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
@@ -36,8 +37,10 @@ interface SummaryData {
 
 export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const { user } = useAppSelector((state) => state.auth);
-  const { notifications, loading: notifLoading } = useAppSelector((state) => state.notifications);
+  const { notifications } = useAppSelector((state) => state.notifications);
 
   const [summary, setSummary] = useState<SummaryData>({
     totalItems: 0,
@@ -50,7 +53,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       // Fetch summary from dashboard api
@@ -66,12 +69,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [dispatch]);
 
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+    }, [loadData])
   );
 
   const onRefresh = () => {
@@ -105,7 +108,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[THEME.primary]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} />}
       >
         {/* Header Section */}
         <View style={styles.header}>
@@ -119,7 +122,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {loading && !refreshing ? (
-          <ActivityIndicator size="large" color={THEME.primary} style={styles.loader} />
+          <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
         ) : (
           <>
             {/* Grid Summary Section */}
@@ -159,21 +162,14 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.actionsRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('AddGrocery')}>
                 <View style={[styles.actionIconBg, { backgroundColor: '#D1FAE5' }]}>
-                  <SvgIcon name="plus" color={THEME.primary} size={22} />
+                  <SvgIcon name="plus" color={theme.primary} size={22} />
                 </View>
                 <Text style={styles.actionBtnTxt}>Add Item</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Scanner')}>
-                <View style={[styles.actionIconBg, { backgroundColor: '#DBEAFE' }]}>
-                  <SvgIcon name="scanner" color={THEME.secondary} size={22} />
-                </View>
-                <Text style={styles.actionBtnTxt}>Barcode Scan</Text>
-              </TouchableOpacity>
-
               <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Main', { screen: 'ShoppingListTab' } as any)}>
                 <View style={[styles.actionIconBg, { backgroundColor: '#FEF3C7' }]}>
-                  <SvgIcon name="shopping-list" color={THEME.warning} size={22} />
+                  <SvgIcon name="shopping-list" color={theme.warning} size={22} />
                 </View>
                 <Text style={styles.actionBtnTxt}>Shopping List</Text>
               </TouchableOpacity>
@@ -203,10 +199,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   scrollContainer: {
     padding: 20,
@@ -216,17 +212,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24
+    marginBottom: 16
   },
   welcomeText: {
     fontSize: 15,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontWeight: '500'
   },
   userName: {
     fontSize: 24,
     fontWeight: '800',
-    color: THEME.text
+    color: theme.text
   },
   avatarPlaceholder: {
     width: 44,
@@ -249,7 +245,7 @@ const styles = StyleSheet.create({
     marginBottom: 24
   },
   summaryCard: {
-    backgroundColor: THEME.card,
+    backgroundColor: theme.card,
     borderRadius: 12,
     width: '48%',
     padding: 16,
@@ -262,30 +258,30 @@ const styles = StyleSheet.create({
   },
   summaryCardWarning: {
     borderLeftWidth: 4,
-    borderLeftColor: THEME.warning
+    borderLeftColor: theme.warning
   },
   summaryCardDanger: {
     borderLeftWidth: 4,
-    borderLeftColor: THEME.danger
+    borderLeftColor: theme.danger
   },
   summaryLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: THEME.textMuted,
+    color: theme.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5
   },
   summaryVal: {
     fontSize: 24,
     fontWeight: '800',
-    color: THEME.text,
+    color: theme.text,
     marginTop: 8
   },
   warningText: {
-    color: THEME.warning
+    color: theme.warning
   },
   dangerText: {
-    color: THEME.danger
+    color: theme.danger
   },
   sectionHeader: {
     marginBottom: 12,
@@ -294,7 +290,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   actionsRow: {
     flexDirection: 'row',
@@ -302,9 +298,9 @@ const styles = StyleSheet.create({
     marginBottom: 24
   },
   actionBtn: {
-    backgroundColor: THEME.card,
+    backgroundColor: theme.card,
     borderRadius: 12,
-    width: '30%',
+    width: '48%',
     paddingVertical: 16,
     alignItems: 'center',
     elevation: 2,
@@ -324,7 +320,7 @@ const styles = StyleSheet.create({
   actionBtnTxt: {
     fontSize: 12,
     fontWeight: '700',
-    color: THEME.text
+    color: theme.text
   },
   emptyNotifCard: {
     backgroundColor: '#F0FDF4',
@@ -352,12 +348,12 @@ const styles = StyleSheet.create({
   alertCardErr: {
     backgroundColor: '#FEF2F2',
     borderLeftWidth: 4,
-    borderLeftColor: THEME.danger
+    borderLeftColor: theme.danger
   },
   alertCardWarn: {
     backgroundColor: '#FFFBEB',
     borderLeftWidth: 4,
-    borderLeftColor: THEME.warning
+    borderLeftColor: theme.warning
   },
   alertHeader: {
     flexDirection: 'row',
@@ -370,14 +366,14 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   },
   alertTextErr: {
-    color: THEME.danger
+    color: theme.danger
   },
   alertTextWarn: {
-    color: THEME.warning
+    color: theme.warning
   },
   dismissBtn: {
     fontSize: 12,
-    color: THEME.textMuted,
+    color: theme.textMuted,
     fontWeight: '700'
   },
   alertMsg: {

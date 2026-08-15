@@ -1,5 +1,5 @@
-const Notification = require('../models/notification');
-const ShoppingList = require('../models/shoppingList');
+const Notification = require('../models/Notification.js');
+const ShoppingList = require('../models/ShoppingList.js');
 
 /**
  * Checks stock level and expiry dates for a grocery item,
