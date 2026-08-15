@@ -30,7 +30,8 @@ interface Props {
 export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
-  const styles = getStyles(theme);
+  const darkMode = useAppSelector((state) => state.settings.darkMode);
+  const styles = getStyles(theme, darkMode);
   const { items, loading } = useAppSelector((state) => state.inventory);
 
   const [search, setSearch] = useState('');
@@ -284,7 +285,7 @@ export const InventoryScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const getStyles = (theme: typeof THEME) => StyleSheet.create({
+const getStyles = (theme: typeof THEME, darkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background
@@ -381,10 +382,13 @@ const getStyles = (theme: typeof THEME) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     marginRight: 6,
-    borderRadius: 4
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'transparent'
   },
   sortBtnActive: {
-    backgroundColor: '#1c2632ff'
+    backgroundColor: darkMode ? '#1c2632ff' : '#FFFFFF',
+    borderColor: darkMode ? '#1c2632ff' : theme.border
   },
   sortBtnTxt: {
     fontSize: 12,
@@ -392,7 +396,7 @@ const getStyles = (theme: typeof THEME) => StyleSheet.create({
     fontWeight: '600'
   },
   sortBtnTxtActive: {
-    color: theme.text,
+    color: darkMode ? theme.text : '#000000',
     fontWeight: '700'
   },
   listContainer: {
