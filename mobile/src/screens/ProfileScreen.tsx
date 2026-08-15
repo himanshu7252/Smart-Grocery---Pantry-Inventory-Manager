@@ -21,6 +21,7 @@ export const ProfileScreen: React.FC = () => {
   const theme = useTheme();
   const { user } = useAppSelector((state) => state.auth);
   const { darkMode, offlineCaching } = useAppSelector((state) => state.settings);
+  const styles = getStyles(theme, darkMode);
 
   const toggleDarkMode = (value: boolean) => {
     dispatch(setDarkMode(value));
@@ -54,7 +55,7 @@ export const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* User Card */}
         <View style={styles.profileCard}>
@@ -67,10 +68,10 @@ export const ProfileScreen: React.FC = () => {
         </View>
 
         {/* App Config */}
-        <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>App Preferences</Text>
-        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={[styles.prefRow, { borderBottomColor: theme.border }]}>
-            <Text style={[styles.prefLabel, { color: theme.text }]}>Dark Mode (Simulation)</Text>
+        <Text style={styles.sectionTitle}>App Preferences</Text>
+        <View style={styles.card}>
+          <View style={styles.prefRow}>
+            <Text style={styles.prefLabel}>Dark Mode (Simulation)</Text>
             <Switch
               value={darkMode}
               onValueChange={toggleDarkMode}
@@ -78,8 +79,8 @@ export const ProfileScreen: React.FC = () => {
               thumbColor={darkMode ? '#FFFFFF' : '#F1F5F9'}
             />
           </View>
-          <View style={[styles.prefRow, { borderBottomColor: theme.border }]}>
-            <Text style={[styles.prefLabel, { color: theme.text }]}>Offline Storage Caching</Text>
+          <View style={styles.prefRow}>
+            <Text style={styles.prefLabel}>Offline Storage Caching</Text>
             <Switch
               value={offlineCaching}
               onValueChange={toggleOfflineCaching}
@@ -90,7 +91,7 @@ export const ProfileScreen: React.FC = () => {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={[styles.logoutBtn, { backgroundColor: theme.card, borderColor: theme.border }]} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutBtnText}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -98,10 +99,10 @@ export const ProfileScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: typeof THEME, darkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background
+    backgroundColor: theme.background
   },
   scrollContainer: {
     paddingTop: 10,
@@ -109,18 +110,20 @@ const styles = StyleSheet.create({
     paddingBottom: 40
   },
   profileCard: {
-    backgroundColor: '#0F172A', // Slate dark card
+    backgroundColor: darkMode ? '#000000' : '#FFFFFF',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: theme.border,
     elevation: 3
   },
   avatarPlaceholder: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: THEME.primary,
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16
@@ -133,22 +136,22 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#FFFFFF'
+    color: theme.text
   },
   emailText: {
     fontSize: 14,
-    color: '#94A3B8',
+    color: theme.textMuted,
     marginTop: 4
   },
   phoneText: {
     fontSize: 13,
-    color: '#CBD5E1',
+    color: theme.textMuted,
     marginTop: 8
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: THEME.textMuted,
+    color: theme.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginTop: 8,
@@ -156,11 +159,11 @@ const styles = StyleSheet.create({
     paddingLeft: 4
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: theme.border,
     elevation: 1,
     marginBottom: 20
   },
@@ -171,16 +174,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9'
+    borderBottomColor: theme.border
   },
   prefLabel: {
     fontSize: 14,
-    color: THEME.text
+    color: theme.text
   },
   logoutBtn: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.card,
     borderWidth: 1,
-    borderColor: '#FCA5A5',
+    borderColor: theme.border,
     borderRadius: 8,
     height: 48,
     justifyContent: 'center',
@@ -189,7 +192,7 @@ const styles = StyleSheet.create({
     elevation: 1
   },
   logoutBtnText: {
-    color: THEME.danger,
+    color: theme.danger,
     fontSize: 15,
     fontWeight: '700'
   }

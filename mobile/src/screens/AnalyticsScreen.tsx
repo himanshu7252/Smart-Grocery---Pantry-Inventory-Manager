@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import { THEME } from '../constants';
 import { useTheme } from '../hooks/useTheme';
+import { useAppSelector } from '../hooks/redux';
 
 interface CategoryData {
   _id: string;
@@ -39,7 +40,8 @@ interface ActivityStat {
 
 export const AnalyticsScreen: React.FC = () => {
   const theme = useTheme();
-  const styles = getStyles(theme);
+  const darkMode = useAppSelector((state) => state.settings.darkMode);
+  const styles = getStyles(theme, darkMode);
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [activities, setActivities] = useState<ActivityStat[]>([]);
   const [predictions, setPredictions] = useState<PredictionData[]>([]);
@@ -215,7 +217,7 @@ export const AnalyticsScreen: React.FC = () => {
   );
 };
 
-const getStyles = (theme: typeof THEME) => StyleSheet.create({
+const getStyles = (theme: typeof THEME, darkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background
@@ -229,29 +231,31 @@ const getStyles = (theme: typeof THEME) => StyleSheet.create({
     marginTop: 40
   },
   valueCard: {
-    backgroundColor: '#0F172A',
+    backgroundColor: darkMode ? '#000000' : '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: theme.border,
     elevation: 3
   },
   valueLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#94A3B8',
+    color: theme.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5
   },
   valueNumber: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: theme.text,
     marginTop: 6
   },
   valueSubtext: {
     fontSize: 12,
-    color: '#64748B',
+    color: theme.textMuted,
     marginTop: 6
   },
   statsRow: {

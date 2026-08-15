@@ -384,7 +384,7 @@ const getStyles = (theme: typeof THEME) => StyleSheet.create({
     borderRadius: 4
   },
   sortBtnActive: {
-    backgroundColor: '#E2E8F0'
+    backgroundColor: '#1c2632ff'
   },
   sortBtnTxt: {
     fontSize: 12,
