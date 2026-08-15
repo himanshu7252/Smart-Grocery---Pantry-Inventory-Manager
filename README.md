@@ -301,6 +301,33 @@ cd smart-grocery-list
 
 ---
 
+## ☁️ Vercel Deployment (Backend)
+
+The Express backend is pre-configured to be deployed as serverless functions on Vercel. 
+
+### Step 1: Create a Vercel Project
+1. Log in to your [Vercel Dashboard](https://vercel.com).
+2. Click **Add New** > **Project** and import your Git repository.
+
+### Step 2: Configure Project Settings
+In the Vercel project configuration setup, configure the following settings:
+*   **Framework Preset**: Select **Other**.
+*   **Root Directory**: Set this to `server`. Vercel will focus entirely on building and running the Express server code located in the `/server` folder.
+
+### Step 3: Add Environment Variables
+Expand the **Environment Variables** accordion and add the following keys:
+*   `MONGO_URI`: Your MongoDB connection URI (e.g. MongoDB Atlas connection string `mongodb+srv://...`).
+*   `JWT_SECRET`: A long secure secret key used to sign and authenticate JWT tokens.
+*   `NODE_ENV`: Set this to `production` so database connection optimization handles errors correctly.
+
+### Step 4: Deploy
+Click **Deploy**. Vercel will automatically build the backend, read the `vercel.json` routing rules, and expose a public URL (e.g., `https://your-project.vercel.app/api/health`).
+
+> [!IMPORTANT]
+> Once deployed, make sure to update the `API_BASE_URL` in the React Native client ([`mobile/src/constants/index.ts`](file:///d:/AppDev/Smart-Grocery-List-Inventory-Management/mobile/src/constants/index.ts)) to match your new Vercel deployment URL (e.g., `https://your-project.vercel.app/api`).
+
+---
+
 ## 🧠 Learning Outcomes & Architectural Lessons
 
 1.  **Event-Driven Sync Cycles**: Synchronizing clients and servers using closed-loop database handlers (checking a shopping item completes backend state hooks, increments stock, and writes logs).
