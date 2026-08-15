@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://server-lake-omega-21.vercel.app/api';
+export const API_BASE_URL = 'https://smart-grocery-pantry-inventory-mana.vercel.app/api';
 
 export const CATEGORIES = [
   'Vegetables',
